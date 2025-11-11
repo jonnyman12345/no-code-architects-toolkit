@@ -31,10 +31,11 @@ def validate_payload(schema):
             if not request.json:
                 return jsonify({"message": "Missing JSON in request"}), 400
 
-            # Create a copy of the request data and remove internal _cloud_job_id field
-            # to prevent validation errors while preserving it for cloud job processing
+            # Create a copy of the request data and remove internal _cloud_job_id and disable_cloud_job fields
+            # to prevent validation errors while preserving them for processing
             validation_data = request.json.copy()
             validation_data.pop('_cloud_job_id', None)
+            validation_data.pop('disable_cloud_job', None)
 
             try:
                 jsonschema.validate(instance=validation_data, schema=schema)
