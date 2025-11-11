@@ -154,7 +154,14 @@ def create_app():
 
                     return response_obj, response[2]
 
-                if os.environ.get("GCP_JOB_NAME") and data.get("webhook_url") and not data.get("disable_cloud_job"):
+                # Check if cloud job should be disabled (env var or payload)
+                disable_by_env = os.environ.get("DISABLE_CLOUD_JOB", "").lower() in ["true", "1"]
+                disable_cloud = (
+                    (disable_by_env and data.get("disable_cloud_job") is not False) or  # Env disabled, not overridden by false
+                    data.get("disable_cloud_job") is True  # Explicitly disabled in payload
+                )
+
+                if os.environ.get("GCP_JOB_NAME") and data.get("webhook_url") and not disable_cloud:
                     try:
                         # Create enhanced payload with original job_id for cloud jobs
                         cloud_payload = data.copy()
